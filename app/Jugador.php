@@ -14,4 +14,8 @@ class Jugador extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    public function cartas(){
+    	return $this->hasMany('App\Cartas', 'id_jugador');
+    }
 }

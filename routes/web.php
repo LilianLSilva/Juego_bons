@@ -21,4 +21,5 @@ Route::get('/', function () {
 
 Route::get('juego', 'JuegoController@index');
 Route::post('juego', 'JuegoController@crearJuego');
+Route::post('jugada', 'JuegoController@Jugada');
 

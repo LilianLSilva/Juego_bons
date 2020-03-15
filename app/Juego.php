@@ -15,4 +15,12 @@ class Juego extends Model
      */
     public $timestamps = false;
 
+    protected $attributes = [
+        'contador_turno' => 0
+    ];
+
+    public function juego_jugador(){
+        return $this->hasMany('App\JuegoJugador', 'id_juego');
+    }
+
 }

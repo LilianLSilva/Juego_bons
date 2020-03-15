@@ -17,15 +17,20 @@
 
          @section('sidebar')
 		<div class="row">
+			<div class="col-md-1"></div>
 			<div class="col-md-6">
 				<h2><strong>Juego Bons</strong> </h2>
 			</div>
 		</div>
+		<br>
         @show
 
         <div class="container">
             @yield('content')
         </div>
+        <script type="text/javascript">
+        	@yield('script')
+        </script>
     </body>
 </html>
 

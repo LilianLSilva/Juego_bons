@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Juego;
 use App\jugador;
+use App\juegoJugador;
+use App\jugada;
+use App\Cartas;
 
 class JuegoController extends Controller
 {
@@ -33,25 +36,60 @@ class JuegoController extends Controller
      */
     public function crearJuego(Request $request)
     {
-// https://github.com/LilianLSilva/Juego_bons
-        // // $this->validate($request,[ 'nombre'=>'required', 'resumen'=>'required', 'npagina'=>'required', 'edicion'=>'required', 'autor'=>'required', 'npagina'=>'required', 'precio'=>'required']);
-        // juego::create($request->all());
 
         $juego = new Juego;
-        $juego->save();
         $jugador = new Jugador;
         $jugador_monstruo = new Jugador;
-        // print 'La carta que salió de la baraja fue: ' . $efectos[$efecto] . 
-        //   ' de ' . $valores[$valor] ;
+        $juego_jugador = new JuegoJugador;
+        $juego_monstruo = new JuegoJugador;
 
+        /*guardo el nuevo Juego*/
+        $juego->save();
+       
+        /*guardo el nuevo jugador*/
         $jugador->nombre = $request->name;
         $jugador->tipo =  self::JUGADOR;
+        //var_dump($jugador);die();
         $jugador->save();
+//var_export($jugador);die();
+        /*guardo el id_juego y id_jugador en Juego jugador*/
+        $juego_jugador->juego()->associate($juego);
+        $juego_jugador->jugador()->associate($jugador);
+        $juego_jugador->save();
+
+        /*guardo el nuevo Monstru0*/
         $jugador_monstruo->nombre = 'monstruo';
         $jugador_monstruo->tipo =  self::MONSTRUO;
         $jugador_monstruo->save();
 
-        return view('juego.create')->with('success','Registro creado satisfactoriamente');
+        /*guardo el id_juego y id_jugador en Juego jugador Monstruo*/
+        $juego_monstruo->juego()->associate($juego);
+        $juego_monstruo->jugador()->associate($jugador_monstruo);
+        $juego_monstruo->escudo = 10;
+        $juego_monstruo->save();
+
+        for ($i=0; $i < 4; $i++ ){ 
+            $carta_jugador = new Cartas;
+            $carta_jugador->jugador()->associate($jugador);
+            $carta_jugador->efecto = self::generar_carta()[0];
+            $carta_jugador->valor= self::generar_carta()[1];
+            $carta_jugador->save();            
+        }
+
+
+        for ($i=0; $i < 4; $i++) { 
+            $carta_monstruo = new Cartas;
+            $carta_monstruo->jugador()->associate($jugador_monstruo);
+            $carta_monstruo->efecto = self::generar_carta()[0];
+            $carta_monstruo->valor= self::generar_carta()[1]; 
+            $carta_monstruo->save();           
+        }
+
+        $turno = ($juego->contador_turno+1);
+        $turnos_jugados= $juego->contador_turno;
+        $turnos_restantes = (12 - $turnos_jugados);
+
+        return view('juego.create', ['turno' => $turno, 'turnos_jugados' => $turnos_jugados, 'turnos_restantes' => $turnos_restantes, 'jugador' => $jugador, 'juego_jugador' => $juego_jugador, 'juego_monstruo' => $juego_monstruo]);
         // echo $request;die();
     //     return $request;
     // return view('juego/create',compact('juegos')); 
@@ -59,12 +97,58 @@ class JuegoController extends Controller
 
 
     private function generar_carta(){
-        $efectos = array('Sanación','Moustruo','Escudo','Ataque');
+        $efectos = array('Sanación','Horror','Escudo','Daño');
         $valores = array(1,2,3,4,5,6,7,8,9);
-        $efecto = array_rand($efectos, 1);
+        $efecto = array_rand($efectos);
         $valor = array_rand($valores, 1);
-        $resultado = ['efecto' => $efecto, 'valor' => $valor];
+        $resultado = [$efectos[$efecto], $valores[$valor]];
+       // var_dump($resultado);die();
         return $resultado;
+    }
+
+    public function Jugada(Request $request){
+        $carta_id = (int)$request->carta_id;
+        $carta = Cartas::find($carta_id);
+        $carta->jugada = 1;
+        $carta->save();
+
+        $juego_jugador = JuegoJugador::where('id_jugador', $carta->id_jugador)->first();
+        $juego = $juego_jugador->juego;
+        $juego->contador_turno++;
+
+        $jugador = $juego_jugador->jugador;
+        $monstruo = $juego->juego_jugador;
+        var_dump($monstruo);
+
+
+        $jugada =  new Jugada;
+        $jugada->juego_jugador()->associate($juego_jugador);
+        $jugada->efecto = $carta->efecto;
+        $jugada->valor = $carta->valor;
+        $jugada->turno = $juego->contador_turno;
+        $jugada->save();
+
+        $Jugador = Jugador::find($carta->id_jugador);
+        switch ($carta->efecto) {
+            case 'Sanación':
+                
+                break;
+            case 'Daño':
+                # code...
+                break;
+            case 'Escudo':
+                # code...
+                break;
+            case 'Horror':
+                # code...
+                break;
+        }
+        $turno = ($juego->contador_turno+1);
+        $turnos_jugados= $juego->contador_turno;
+        $turnos_restantes = (12 - $turnos_jugados);
+
+        return view('juego.create', ['turno' => $turno, 'turnos_jugados' => $turnos_jugados, 'turnos_restantes' => $turnos_restantes, 'jugador' => $jugador, 'juego_jugador' => $juego_jugador, 'juego_monstruo' => $juego_monstruo]);
+
     }
     /**
      * Show the form for creating a new resource.

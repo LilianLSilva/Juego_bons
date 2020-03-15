@@ -4,9 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Jugada extends Model
+class Cartas extends Model
 {
-     protected $table = 'jugada';
+     protected $table = 'cartas';
+
      /**
      * Indicates if the model should be timestamped.
      *
@@ -14,7 +15,8 @@ class Jugada extends Model
      */
     public $timestamps = false;
 
-    public function juego_jugador(){
-    	return $this->belongsTo('App\JuegoJugador', 'id_juego_jugador');
+
+    public function jugador(){
+    	return $this->belongsTo('App\Jugador', 'id_jugador');
     }
 }
