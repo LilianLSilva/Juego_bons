@@ -18,4 +18,8 @@ class Jugador extends Model
     public function cartas(){
     	return $this->hasMany('App\Cartas', 'id_jugador');
     }
+
+    public function juego_jugador(){
+        return $this->hasOne('App\JuegoJugador', 'id_jugador');
+    }
 }

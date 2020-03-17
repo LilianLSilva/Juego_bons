@@ -128,7 +128,7 @@ class JuegoController extends Controller
         $jugada->save();
 
         /*A partir del registro de la carta, obtengo el jugador Monstruo */
-        $juego_monstruo = JuegoJugador::where('id_jugador', '!=', $carta->id_jugador)->first();
+        $juego_monstruo = $juego->juego_jugador->where('id_jugador', '!=', $carta->id_jugador)->first();
 
         /*Aplico les Efectos correspondientes a la carta seleccionada*/
         self::afectar($carta, $juego_jugador, $juego_monstruo);
@@ -140,8 +140,9 @@ class JuegoController extends Controller
         $carta_jugador->valor= self::generar_carta()[1];
         $carta_jugador->save();
 
-        $carta_monstruo = Cartas::where('id_jugador', '!=', $carta->id_jugador)->where('jugada', '!=', 1)->inRandomOrder()->first();
-    
+
+        $carta_monstruo = $juego_monstruo->jugador->cartas->where('jugada', '!=', 1)->random();
+
         $turno = ($juego->contador_turno+1);
         $turnos_jugados= $juego->contador_turno;
         $turnos_restantes = (12 - $turnos_jugados);
@@ -167,11 +168,11 @@ class JuegoController extends Controller
         $carta->save();
 
         $jugador = $carta->jugador;
+        $juego = $jugador->juego_jugador->juego;
        
         /*Obtengo el registro de JuegoJugador del Jugador actual a partir del cual consigo el id del juego y modifico el contador de turno*/
         $juego_monstruo = JuegoJugador::where('id_jugador', $jugador->id)->first();
-        $juego = $juego_monstruo->juego;
-        $juego->contador_turno++;
+        //$juego->contador_turno;
         $juego->save();
 
         /*A partir del juego Jugador, guardo en jugada la carta jugada*/
@@ -184,7 +185,7 @@ class JuegoController extends Controller
 
         // /*A partir del registro de la carta, obtengo el jugador Monstruo */
         /*Aplico les Efectos correspondientes a la carta seleccionada*/
-        $juego_jugador = JuegoJugador::where('id_jugador', '!=', $carta->id_jugador)->first();
+        $juego_jugador = $juego->juego_jugador->where('id_jugador', '!=', $carta->id_jugador)->first();
         self::afectar($carta, $juego_monstruo, $juego_jugador);
 
         /*Genero una nueva carta para el jugador*/
@@ -213,7 +214,18 @@ class JuegoController extends Controller
                 $juego_jugador->save();
                 break;
             case 'Daño':
-                $juego_contrario->salud = ($juego_contrario->salud - $carta->valor);
+                if(empty($juego_contrario->escudo)){
+                    $juego_contrario->salud = ($juego_contrario->salud - $carta->valor);
+                    if ($juego_contrario->salud < 0) {
+                        $juego_contrario = 0;
+                    }
+                }else{
+                    $juego_contrario->escudo = ($juego_contrario->escudo - $carta->valor);
+                    if($juego_contrario->escudo < 0) {
+                         $juego_contrario->salud += $juego_contrario->escudo;
+                         $juego_contrario->escudo = 0;
+                    } 
+                }
                 $juego_contrario->save();
                 break;
             case 'Escudo':
@@ -222,6 +234,9 @@ class JuegoController extends Controller
                 break;
             case 'Horror':
                 $juego_contrario->escudo = ($juego_contrario->escudo - $carta->valor);
+                if($juego_contrario->escudo < 0) {
+                         $juego_contrario->escudo = 0;
+                    } 
                 $juego_contrario->save();
                 break;
         }

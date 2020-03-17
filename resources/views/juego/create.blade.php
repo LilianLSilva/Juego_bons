@@ -64,7 +64,7 @@
 		<form action="jugada" class="form-group" method="POST">
 			<input type="hidden" name="carta_id" id="carta"></input>
 			<input type="hidden" name="_token" value="{{ csrf_token() }}"></input>
-		@foreach($jugador->cartas as $carta)
+		@foreach($jugador->cartas->where('jugada', '!=', 1) as $carta)
 			<div class="col-md-2">
 				<label class="control-label">{{$carta->efecto}}</label>
 				@switch($carta->efecto)
