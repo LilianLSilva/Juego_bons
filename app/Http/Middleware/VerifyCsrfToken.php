@@ -18,7 +18,7 @@ class VerifyCsrfToken extends Middleware
      *
      * @var array
      */
-    // protected $except = [
-    //     'http://localhost:8000/jugada'
-    // ];
+     protected $except = [
+     'http://localhost:8000/api/*'
+    ];
 }

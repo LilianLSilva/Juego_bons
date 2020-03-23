@@ -22,3 +22,10 @@ Route::get('/', function () {
 Route::get('juego', 'JuegoController@index');
 Route::post('juego', 'JuegoController@crearJuego');
 Route::post('jugada', 'JuegoController@Jugada');
+
+
+Route::post('api/juego', 'JuegoApiController@crearJuego');
+Route::get('api/juego/{id}', 'JuegoApiController@obtenerJuego');
+Route::get('api/jugador/{id}', 'JuegoApiController@obtenerJugador');
+Route::get('api/cartas/{id}', 'JuegoApiController@obtenerCartas');
+Route::get('api/generarjugada/{id}', 'JuegoApiController@generarJugada');

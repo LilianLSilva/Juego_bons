@@ -89,19 +89,17 @@ class JuegoController extends Controller
         $turnos_restantes = (11 - $turnos_jugados);
 
         return view('juego.create', ['turno' => $turno, 'turnos_jugados' => $turnos_jugados, 'turnos_restantes' => $turnos_restantes, 'jugador' => $jugador, 'juego_jugador' => $juego_jugador, 'juego_monstruo' => $juego_monstruo]);
-        // echo $request;die();
-    //     return $request;
-    // return view('juego/create',compact('juegos')); 
+       
     }
 
 
-    private function generar_carta(){
+    public function generar_carta(){
         $efectos = array('Sanación','Horror','Escudo','Daño');
         $valores = array(1,2,3,4,5,6,7,8,9);
         $efecto = array_rand($efectos);
         $valor = array_rand($valores, 1);
         $resultado = [$efectos[$efecto], $valores[$valor]];
-       // var_dump($resultado);die();
+
         return $resultado;
     }
 
@@ -140,7 +138,6 @@ class JuegoController extends Controller
         $carta_jugador->valor= self::generar_carta()[1];
         $carta_jugador->save();
 
-
         $carta_monstruo = $juego_monstruo->jugador->cartas->where('jugada', '!=', 1)->random();
 
         $turno = ($juego->contador_turno+1);
@@ -150,12 +147,6 @@ class JuegoController extends Controller
         $juego_monstruo = self::juega_monstruo($carta_monstruo->id);
 
         $jugador = $juego_jugador->jugador;
-
-       // $juego_jugador = JuegoJugador::where('id_jugador', $jugador->id)->first();
-
-        // $cartas = Cartas::where('id_jugador', $carta->id_jugador)->where('jugada', '!=', 1)->get();
-        // dd($cartas);
-        //$carta_jugador->jugador()->associate($juego_jugador->jugador);
 
         return view('juego.create', ['turno' => $turno, 'turnos_jugados' => $turnos_jugados, 'turnos_restantes' => $turnos_restantes, 'jugador' => $jugador, 'juego_jugador' => $juego_jugador,'juego_monstruo' => $juego_monstruo]);
 
@@ -183,7 +174,7 @@ class JuegoController extends Controller
         $jugada->turno = $juego->contador_turno;
         $jugada->save();
 
-        // /*A partir del registro de la carta, obtengo el jugador Monstruo */
+        /*A partir del registro de la carta, obtengo el jugador Monstruo */
         /*Aplico les Efectos correspondientes a la carta seleccionada*/
         $juego_jugador = $juego->juego_jugador->where('id_jugador', '!=', $carta->id_jugador)->first();
         self::afectar($carta, $juego_monstruo, $juego_jugador);
